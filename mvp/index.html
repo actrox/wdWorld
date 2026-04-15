@@ -1,0 +1,408 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VVD World Local Alpha</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-block">
+        <p class="eyebrow">VVD World Local</p>
+        <h1>本地世界观工作台 Alpha</h1>
+        <p class="topbar-summary">
+          这是一套本地优先的世界观创作工作台原型，围绕“编辑 / 地图 / 画布 / 关系图 / 百科”推进，
+          目标是在本地环境里逐步做出接近公开展示版创作体验的工作流。
+        </p>
+      </div>
+
+      <div class="topbar-actions">
+        <label class="project-name-field">
+          <span>项目名称</span>
+          <input id="project-name-input" type="text" placeholder="输入你的世界观项目名" />
+        </label>
+
+        <select id="new-entry-type-select" class="action-button type-select"></select>
+        <button id="create-entry-button" class="action-button primary">新建条目</button>
+        <button id="seed-demo-button" class="action-button">填充示例</button>
+        <button id="export-button" class="action-button">导出 JSON</button>
+        <label class="action-button import-button" for="import-file-input">导入 JSON</label>
+        <input id="import-file-input" type="file" accept=".json,application/json" hidden />
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar">
+        <section class="panel toolkit-panel">
+          <div class="panel-header">
+            <h2>工具集</h2>
+          </div>
+          <div id="toolkit-tabs" class="toolkit-tabs"></div>
+        </section>
+
+        <section class="panel search-panel">
+          <div class="panel-header">
+            <h2>条目浏览</h2>
+            <span id="entry-counter" class="counter-badge">0</span>
+          </div>
+
+          <label class="field">
+            <span>搜索条目</span>
+            <input id="search-input" type="search" placeholder="标题、摘要、正文、标签、别名" />
+          </label>
+
+          <div id="type-filter-bar" class="type-filter-bar"></div>
+          <div id="entry-list" class="entry-list"></div>
+        </section>
+      </aside>
+
+      <section class="editor-area">
+        <section class="panel overview-panel">
+          <div class="panel-header">
+            <h2>项目概览</h2>
+            <span id="save-status" class="save-status">尚未保存</span>
+          </div>
+          <div id="project-stats" class="stats-grid"></div>
+        </section>
+
+        <section class="panel focus-panel">
+          <div class="panel-header">
+            <h2>当前焦点</h2>
+          </div>
+          <div id="focus-card" class="focus-card"></div>
+        </section>
+
+        <section id="editor-view" class="panel view-panel">
+          <div class="panel-header">
+            <h2>编辑</h2>
+            <button id="delete-entry-button" class="danger-link" type="button">删除当前条目</button>
+          </div>
+
+          <form id="entry-form" class="entry-form">
+            <div class="form-grid">
+              <label class="field">
+                <span>标题</span>
+                <input id="title-input" name="title" type="text" placeholder="例如：Kethvari Outlook" />
+              </label>
+
+              <label class="field">
+                <span>类型</span>
+                <select id="type-input" name="type"></select>
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <label class="field">
+                <span>别名</span>
+                <input
+                  id="aliases-input"
+                  name="aliases"
+                  type="text"
+                  placeholder="用逗号分隔，例如：The Spire, Old Beacon"
+                />
+              </label>
+
+              <label class="field">
+                <span>区域</span>
+                <input
+                  id="region-input"
+                  name="region"
+                  type="text"
+                  list="region-suggestions"
+                  placeholder="例如：Velthorn Basin"
+                />
+              </label>
+            </div>
+
+            <datalist id="region-suggestions"></datalist>
+
+            <div class="form-grid three-columns">
+              <label class="field">
+                <span>状态</span>
+                <input id="condition-input" name="condition" type="text" placeholder="例如：部分坍塌" />
+              </label>
+
+              <label class="field">
+                <span>占据者</span>
+                <input id="occupants-input" name="occupants" type="text" placeholder="例如：多方争夺" />
+              </label>
+
+              <label class="field">
+                <span>标签</span>
+                <input
+                  id="tags-input"
+                  name="tags"
+                  type="text"
+                  placeholder="用逗号分隔，例如：tower, ruin, trade-route"
+                />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>摘要</span>
+              <textarea id="summary-input" name="summary" rows="3" placeholder="用 1 到 3 句话概括这个条目"></textarea>
+            </label>
+
+            <label class="field">
+              <span>正文</span>
+              <textarea id="content-input" name="content" rows="8" placeholder="这里用于记录条目的主要叙事内容"></textarea>
+            </label>
+
+            <label class="field">
+              <span>备注</span>
+              <textarea id="notes-input" name="notes" rows="4" placeholder="记录冲突、线索、设定补充与创作备注"></textarea>
+            </label>
+
+            <div class="form-grid three-columns">
+              <label class="field">
+                <span>地图 X</span>
+                <input id="map-x-input" name="mapX" type="number" min="0" max="100" step="1" />
+              </label>
+
+              <label class="field">
+                <span>地图 Y</span>
+                <input id="map-y-input" name="mapY" type="number" min="0" max="100" step="1" />
+              </label>
+            </div>
+
+            <label class="field">
+              <span>条目图片</span>
+              <input id="image-url-input" name="imageUrl" type="url" placeholder="填入图片 URL，不填则保持当前默认样式" />
+            </label>
+
+            <section id="entry-anchor-section" class="anchor-section hidden-panel">
+              <div class="panel-header compact">
+                <h3>挂靠锚点</h3>
+              </div>
+              <p class="panel-subtitle">普通条目可以挂靠到所属区域的某个锚点，形成“区域 → 锚点 → 子地点”的结构。</p>
+              <label class="field">
+                <span>锚点选择</span>
+                <select id="entry-anchor-select"></select>
+              </label>
+            </section>
+
+            <section id="region-shape-section" class="region-shape-section hidden-panel">
+              <div class="panel-header compact">
+                <h3>区域几何</h3>
+              </div>
+
+              <p class="panel-subtitle">
+                当前条目是区域时，可以在这里调整范围大小、位置和旋转；地图放置模式也会直接移动区域中心。
+              </p>
+
+              <div class="form-grid region-shape-grid">
+                <label class="field">
+                  <span>顶部</span>
+                  <input id="region-top-input" type="number" min="0" max="100" step="1" />
+                </label>
+
+                <label class="field">
+                  <span>左侧</span>
+                  <input id="region-left-input" type="number" min="0" max="100" step="1" />
+                </label>
+
+                <label class="field">
+                  <span>宽度</span>
+                  <input id="region-width-input" type="number" min="10" max="60" step="1" />
+                </label>
+
+                <label class="field">
+                  <span>高度</span>
+                  <input id="region-height-input" type="number" min="10" max="48" step="1" />
+                </label>
+
+                <label class="field">
+                  <span>旋转</span>
+                  <input id="region-rotation-input" type="number" min="-25" max="25" step="1" />
+                </label>
+              </div>
+            </section>
+
+            <section id="region-anchor-section" class="anchor-section hidden-panel">
+              <div class="panel-header compact">
+                <h3>区域锚点</h3>
+              </div>
+              <p class="panel-subtitle">
+                锚点用于表达区域内部的关键节点，例如港口、山口、哨站、聚落、遗迹和贸易枢纽。
+              </p>
+
+              <div class="anchor-composer">
+                <div class="form-grid three-columns">
+                  <label class="field">
+                    <span>锚点名称</span>
+                    <input id="anchor-label-input" type="text" placeholder="例如：灰塔山口" />
+                  </label>
+
+                  <label class="field">
+                    <span>区域内 X</span>
+                    <input id="anchor-x-input" type="number" min="0" max="100" step="1" value="50" />
+                  </label>
+
+                  <label class="field">
+                    <span>区域内 Y</span>
+                    <input id="anchor-y-input" type="number" min="0" max="100" step="1" value="50" />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>锚点说明</span>
+                  <textarea id="anchor-notes-input" rows="3" placeholder="说明这个锚点承载的功能、风貌或局部故事。"></textarea>
+                </label>
+
+                <div class="timeline-action-row">
+                  <button id="add-anchor-button" type="button" class="action-button primary">新增锚点</button>
+                </div>
+              </div>
+
+              <div id="region-anchor-list" class="anchor-list"></div>
+            </section>
+
+            <section class="relation-section">
+              <div class="panel-header compact">
+                <h3>关系</h3>
+              </div>
+
+              <div class="relation-composer">
+                <select id="relation-target-select"></select>
+                <input id="relation-type-input" type="text" placeholder="例如：隶属于 / 守望 / 竞争 / 位于" />
+                <button id="add-relation-button" type="button" class="action-button">添加</button>
+              </div>
+
+              <div id="relation-list" class="relation-list"></div>
+            </section>
+          </form>
+        </section>
+
+        <section id="map-view" class="panel view-panel hidden-panel">
+          <div class="panel-header">
+            <div>
+              <h2>地图</h2>
+              <p id="map-edit-hint" class="panel-subtitle">你可以在这里查看和摆放条目位置。</p>
+            </div>
+            <div class="map-toolbar">
+              <div class="map-camera-controls">
+                <button id="map-zoom-out-button" class="action-button" type="button">缩小</button>
+                <span id="map-zoom-indicator" class="map-zoom-indicator">100%</span>
+                <button id="map-zoom-in-button" class="action-button" type="button">放大</button>
+                <button id="map-reset-view-button" class="action-button" type="button">重置视角</button>
+              </div>
+              <button id="map-edit-toggle-button" class="action-button" type="button">放置模式：关闭</button>
+            </div>
+          </div>
+
+          <div id="map-layer-filter-bar" class="map-layer-filter-bar"></div>
+
+          <div id="map-surface" class="map-surface"></div>
+          <div id="map-focus" class="map-focus"></div>
+        </section>
+
+        <section id="canvas-view" class="panel view-panel hidden-panel">
+          <div class="panel-header">
+            <h2>画布</h2>
+          </div>
+          <div id="canvas-columns" class="canvas-columns"></div>
+        </section>
+
+        <section id="timeline-view" class="panel view-panel hidden-panel">
+          <div class="panel-header">
+            <div>
+              <h2>时间轴</h2>
+              <p class="panel-subtitle">点击工具集中的时间轴后，集中查看整个世界与当前条目的时间线。</p>
+            </div>
+          </div>
+
+          <div class="timeline-workspace">
+            <section class="timeline-section world-timeline-panel">
+              <div class="panel-header compact">
+                <div>
+                  <h3>世界时间轴</h3>
+                  <p class="panel-subtitle">用于维护整个世界观的大事件、时代节点和公共历史。</p>
+                </div>
+              </div>
+              <div class="timeline-composer world-timeline-composer">
+                <label class="field">
+                  <span>时间点</span>
+                  <input id="project-timeline-point-input" type="text" placeholder="例如：灵异复苏早期 / 总部成立后 / 大昌市事件后" />
+                </label>
+                <label class="field">
+                  <span>排序值</span>
+                  <input id="project-timeline-sort-input" type="number" step="1" placeholder="可选，用于手动指定先后顺序" />
+                </label>
+                <label class="field timeline-title-field">
+                  <span>事件标题</span>
+                  <input id="project-timeline-title-input" type="text" placeholder="例如：总部建立 / 成功关押 S 级事件" />
+                </label>
+                <label class="field timeline-description-field">
+                  <span>事件说明</span>
+                  <textarea id="project-timeline-description-input" rows="3" placeholder="补充这个世界级节点的内容、影响和后续作用。"></textarea>
+                </label>
+                <div class="timeline-action-row">
+                  <button id="add-project-timeline-button" type="button" class="action-button primary">添加世界时间节点</button>
+                </div>
+              </div>
+              <div id="project-timeline-list" class="timeline-list"></div>
+            </section>
+
+            <section class="timeline-section">
+              <div class="panel-header compact">
+                <div>
+                  <h3>当前条目时间轴</h3>
+                  <p class="panel-subtitle">围绕当前焦点条目补充起源、转折、事件节点和结果。</p>
+                </div>
+              </div>
+
+              <div class="timeline-composer">
+                <label class="field">
+                  <span>时间点</span>
+                  <input id="timeline-point-input" type="text" placeholder="例如：1219 年 / 第三纪元 / 大迁徙前夜" />
+                </label>
+
+                <label class="field">
+                  <span>排序值</span>
+                  <input id="timeline-sort-input" type="number" step="1" placeholder="可选，用于手动指定先后顺序" />
+                </label>
+
+                <label class="field timeline-title-field">
+                  <span>事件标题</span>
+                  <input id="timeline-title-input" type="text" placeholder="例如：港务扩建 / 协定签署 / 灰塔陷落" />
+                </label>
+
+                <label class="field timeline-description-field">
+                  <span>事件说明</span>
+                  <textarea id="timeline-description-input" rows="3" placeholder="补充这一时间点发生了什么、影响了谁、为什么重要。"></textarea>
+                </label>
+
+                <div class="timeline-action-row">
+                  <button id="add-timeline-button" type="button" class="action-button primary">添加时间节点</button>
+                </div>
+              </div>
+
+              <div id="timeline-list" class="timeline-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="graph-view" class="panel view-panel hidden-panel">
+          <div class="panel-header">
+            <h2>关系图</h2>
+          </div>
+          <div id="graph-surface" class="graph-surface"></div>
+        </section>
+
+        <section id="wiki-view" class="panel view-panel hidden-panel">
+          <div class="panel-header">
+            <h2>百科</h2>
+          </div>
+
+          <div class="wiki-layout">
+            <aside id="wiki-navigation" class="wiki-navigation"></aside>
+            <article id="wiki-article" class="wiki-article"></article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>

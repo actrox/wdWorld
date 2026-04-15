@@ -1,0 +1,7 @@
+﻿interface:
+  display_name: "中文高可读代码"
+  short_description: "高可读、模块化、中文注释的编码规范技能"
+  default_prompt: "使用 $readable-modular-zh-code 按高可读性、模块化和中文注释规范完成代码实现。"
+
+policy:
+  allow_implicit_invocation: true

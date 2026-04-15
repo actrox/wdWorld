@@ -1,0 +1,6 @@
+.vs/
+node_modules/
+dist/
+build/
+Thumbs.db
+Desktop.ini
